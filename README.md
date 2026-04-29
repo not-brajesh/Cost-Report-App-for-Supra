@@ -13,7 +13,9 @@ Standalone Progressive Web App (PWA) for generating SUPRA SAEINDIA Cost Reports.
 
 ## Deployed App
 
-**Live URL:** [https://supra-cost-report.netlify.app](https://supra-cost-report.netlify.app)
+**GitHub Pages (Primary):** [https://not-brajesh.github.io/Cost-Report-App-for-Supra/](https://not-brajesh.github.io/Cost-Report-App-for-Supra/)
+
+**Netlify (Mirror):** [https://supra-cost-report.netlify.app](https://supra-cost-report.netlify.app)
 
 ## Installation
 
@@ -53,6 +55,13 @@ npm run build
 ```
 
 ## Deployment
+
+### Deploy to GitHub Pages
+
+1. Go to **Settings** → **Pages** in your GitHub repo
+2. Set **Source** to `main` branch and `/(root)` folder
+3. Click **Save**
+4. Wait 2-5 minutes for deployment
 
 ### Deploy to Netlify
 
