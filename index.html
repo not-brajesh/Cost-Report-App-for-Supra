@@ -41,9 +41,26 @@
     .download-btn.hidden {
       display: none;
     }
+
+    /* JAVITRON Particle Background */
+    #javitron-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: all;
+    }
+
+    #root {
+      position: relative;
+      z-index: 1;
+    }
   </style>
 </head>
   <body>
+    <canvas id="javitron-canvas"></canvas>
     <div id="root"></div>
     <button id="downloadBtn" class="download-btn">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -167,6 +184,182 @@
         localStorage.removeItem(STORAGE_KEY);
         console.log('Saved form data cleared');
       };
+    })();
+    </script>
+
+    <!-- JAVITRON Particle Text Effect -->
+    <script>
+    (function() {
+      const canvas = document.getElementById('javitron-canvas');
+      const ctx = canvas.getContext('2d');
+      
+      let particles = [];
+      let mouse = { x: null, y: null, radius: 40 };
+      let animationId;
+      
+      // Resize canvas
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        init();
+      }
+      
+      // Mouse tracking
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+      });
+      
+      window.addEventListener('mouseout', () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
+      
+      // Touch support
+      window.addEventListener('touchmove', (e) => {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+      });
+      
+      window.addEventListener('touchend', () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
+      
+      // Particle class
+      class Particle {
+        constructor(x, y) {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.originX = x;
+          this.originY = y;
+          this.size = Math.random() * 2 + 1.5;
+          this.color = `rgba(255, 107, 53, ${Math.random() * 0.1 + 0.9})`;
+          this.velocity = { x: 0, y: 0 };
+          this.friction = 0.90;
+          this.ease = 0.08;
+          this.dispersed = false;
+        }
+        
+        update() {
+          // Calculate distance from mouse - only disperse when cursor is directly on this particle
+          if (mouse.x != null) {
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Very tight radius - only disperse when cursor is directly touching the particle
+            if (distance < 25) {
+              this.dispersed = true;
+              const forceDirectionX = dx / distance;
+              const forceDirectionY = dy / distance;
+              const force = (25 - distance) / 25;
+              const directionX = forceDirectionX * force * 25;
+              const directionY = forceDirectionY * force * 25;
+              
+              this.velocity.x -= directionX;
+              this.velocity.y -= directionY;
+            }
+          }
+          
+          // Strong magnetic pull back to original position
+          let dx = this.originX - this.x;
+          let dy = this.originY - this.y;
+          this.velocity.x += dx * this.ease;
+          this.velocity.y += dy * this.ease;
+          
+          // Reset dispersed flag when particle returns to origin
+          if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
+            this.dispersed = false;
+          }
+          
+          // Apply velocity with friction
+          this.velocity.x *= this.friction;
+          this.velocity.y *= this.friction;
+          this.x += this.velocity.x;
+          this.y += this.velocity.y;
+        }
+        
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      // Initialize particles from text
+      function init() {
+        particles = [];
+        
+        // Create offscreen canvas for text analysis
+        const offCanvas = document.createElement('canvas');
+        const offCtx = offCanvas.getContext('2d');
+        offCanvas.width = canvas.width;
+        offCanvas.height = canvas.height;
+        
+        // Calculate font size for full screen width - edge to edge
+        const fontSize = Math.min(canvas.width / 3.2, 300);
+        offCtx.font = `900 ${fontSize}px Arial, sans-serif`;
+        offCtx.fillStyle = 'white';
+        offCtx.textAlign = 'center';
+        offCtx.textBaseline = 'middle';
+        
+        // Draw text
+        const text = 'JAVITRON';
+        offCtx.fillText(text, offCanvas.width / 2, offCanvas.height / 2);
+        
+        // Get pixel data
+        const imageData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height);
+        const data = imageData.data;
+        
+        // Scan pixels and create particles - every 2nd pixel for density
+        const step = 2;
+        for (let y = 0; y < offCanvas.height; y += step) {
+          for (let x = 0; x < offCanvas.width; x += step) {
+            const index = (y * offCanvas.width + x) * 4;
+            const alpha = data[index + 3];
+            
+            if (alpha > 128) {
+              particles.push(new Particle(x, y));
+            }
+          }
+        }
+      }
+      
+      // Animation loop
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Update and draw particles
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+          
+          // Draw connecting lines between nearby particles for mesh effect
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 12) {
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(255, 140, 80, ${0.25 * (1 - distance / 12)})`;
+              ctx.lineWidth = 1;
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+        
+        animationId = requestAnimationFrame(animate);
+      }
+      
+      // Start
+      window.addEventListener('resize', resize);
+      resize();
+      animate();
     })();
     </script>
   </body>
