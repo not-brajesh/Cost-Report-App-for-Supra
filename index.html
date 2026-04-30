@@ -1498,6 +1498,108 @@ window.completeMaterialDatabase = {
   "Wheel, 8, 1 Piece, DWT, Alumalite, Aluminum, 7-8": { price: 2535, unit: "unit", category: "Wheel" }
 };
 
+    // HARDCODED CSV DATA FROM CostTable_Materials_2025_converted.csv
+    window.CSV_MATERIALS_DATA = `Material,Category,Price,Unit
+Bearing Ball, Steel,Bearings,0.195,mm
+Bearing, Ball, Angular Contact,Bearings,Formula,mm
+Bearing, Ball, Deep Groove,Bearings,Formula,mm
+Bearing, Ball, Radial,Bearings,Formula,mm
+Bearing, Cylindrical Roller,Bearings,234,mm
+Bearing, Needle,Bearings,234,mm
+Bearing, Spherical,Bearings,325,mm
+Bearing, Tapered Roller,Bearings,679.25,mm
+Rod End, Aluminum,Bearings,247,mm
+Rod End, Industrial,Bearings,79.04,mm
+Wheel Bearing, Ball, Radial,Bearings,Formula,mm
+Wheel Bearing, Tapered Roller,Bearings,1358.5,mm
+Brake Caliper, AP, CP2577,Brake System,8125,unit
+Brake Caliper, Brembo, 20.6950.10,Brake System,4550,unit
+Brake Caliper, Wilwood, Dynalite Single Floater,Brake System,3250,unit
+Brake Caliper, Wilwood, GP310,Brake System,6825,unit
+Brake Caliper, Student Built,Brake System,0,unit
+Master Cylinder, AP, CP2623,Brake System,5297.5,unit
+Master Cylinder, Brembo, 10.4776.10,Brake System,1690,unit
+Master Cylinder, Wilwood, 260-1304,Brake System,1755,unit
+Proportioning Valve, Hydraulic,Brake System,2275,unit
+Aluminum, Normal,Raw Material,273,kg
+Aluminum, Premium,Raw Material,273,kg
+Steel, Mild,Raw Material,146.25,kg
+Steel, Stainless,Raw Material,146.25,kg
+Titanium,Raw Material,1430,kg
+Carbon Fiber, 1 Ply,Composite,13000,kg
+Honeycomb, Nomex,Composite,8125,kg
+Suspension Springs, Coil Spring, Steel,Springs,1625,unit
+Suspension Springs, Coil Spring, Titanium,Springs,7150,unit
+Tire, Hoosier, R25B, 13"-20.0 x 7.5,Tire,5525,unit
+Tire, Avon, A45, 13"-20.0 x 7.2,Tire,6500,unit
+Harness, Driver,Safety,2925,unit
+Sensor, Accelerometer, 3 Axis,Sensors,520,unit
+Sensor, Fluid Pressure,Sensors,260,unit
+Battery, Tractive Lithium,EV - Electronics,39000,kWh
+Motor, Tractive AC,EV - Tractive Drive,6500,kW
+Paint,Misc,650,m^2
+Foam, Fuel Anti-Surge,Fuel System,65,liter`;
+
+    // HARDCODED: Direct dropdown replacement with CSV data
+    (function hardcodeMaterials() {
+      function parseAndInject() {
+        const csv = window.CSV_MATERIALS_DATA;
+        if(!csv) return;
+        
+        // Parse CSV
+        const lines = csv.split('\n');
+        const headers = lines[0].split(',');
+        const materials = [];
+        
+        for(let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',');
+          if(cols.length >= 4) {
+            materials.push({
+              name: cols[0],
+              category: cols[1],
+              price: cols[2],
+              unit: cols[3]
+            });
+          }
+        }
+        
+        // Group by category
+        const cats = {};
+        materials.forEach(m => {
+          if(!cats[m.category]) cats[m.category] = [];
+          cats[m.category].push(m);
+        });
+        
+        // Find and replace ALL dropdowns
+        document.querySelectorAll('select').forEach((select, idx) => {
+          if(select.dataset.hardcoded) return; // Skip if already done
+          
+          select.innerHTML = '<option value="">📋 Select Material (' + materials.length + ' items)</option>';
+          
+          Object.keys(cats).sort().forEach(cat => {
+            const og = document.createElement('optgroup');
+            og.label = cat + ' (' + cats[cat].length + ')';
+            cats[cat].forEach(m => {
+              const opt = document.createElement('option');
+              opt.value = m.name;
+              opt.textContent = m.name + ' - ' + m.price + ' ' + m.unit;
+              og.appendChild(opt);
+            });
+            select.appendChild(og);
+          });
+          
+          select.dataset.hardcoded = 'true';
+          console.log('✅ Hardcoded dropdown #' + idx);
+        });
+        
+        console.log('🎉 HARDCODED ' + materials.length + ' materials into dropdowns!');
+      }
+      
+      // Run immediately and repeatedly
+      setInterval(parseAndInject, 2000);
+      parseAndInject();
+    })();
+
     // Inject 898 materials into app dropdowns - FORCE MODE
     (function() {
       let injectedMaterials = false;
