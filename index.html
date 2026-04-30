@@ -1619,5 +1619,67 @@ window.completeMaterialDatabase = {
       });
     })();
 
+    // Add Load Materials Button
+    (function() {
+      function addButton() {
+        if(document.getElementById('loadMaterialsBtn')) return;
+        
+        const btn = document.createElement('button');
+        btn.id = 'loadMaterialsBtn';
+        btn.textContent = '📦 Load 898 Materials from CSV';
+        btn.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:9999;background:#28a745;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+        
+        btn.onclick = function() {
+          const db = window.completeMaterialDatabase;
+          if(!db) {
+            alert('Database not found! Please refresh.');
+            return;
+          }
+          
+          let count = 0;
+          document.querySelectorAll('select').forEach(select => {
+            const options = Array.from(select.querySelectorAll('option'));
+            const text = options.map(o => o.text).join(' ');
+            
+            if(text.includes('Steel') || text.includes('Aluminium') || text.includes('Select Material') || text.includes('Select Part')) {
+              select.innerHTML = '<option value="">Select from 898 Materials</option>';
+              
+              const cats = {};
+              Object.entries(db).forEach(([name, data]) => {
+                const c = data.category || 'Other';
+                if(!cats[c]) cats[c] = [];
+                cats[c].push({name, ...data});
+              });
+              
+              Object.keys(cats).sort().forEach(cat => {
+                const og = document.createElement('optgroup');
+                og.label = cat + ' (' + cats[cat].length + ')';
+                cats[cat].sort((a,b) => a.name.localeCompare(b.name));
+                cats[cat].forEach(m => {
+                  const opt = document.createElement('option');
+                  opt.value = m.name;
+                  opt.textContent = m.name + ' - ' + (typeof m.price === 'number' ? '₹'+m.price.toLocaleString() : '[Formula]');
+                  og.appendChild(opt);
+                });
+                select.appendChild(og);
+              });
+              count++;
+            }
+          });
+          
+          btn.textContent = '✅ Loaded 898 Materials into ' + count + ' dropdowns!';
+          btn.style.background = '#17a2b8';
+          setTimeout(() => {
+            btn.style.opacity = '0.7';
+          }, 3000);
+        };
+        
+        document.body.appendChild(btn);
+        console.log('📦 Load Materials button added - Click it!');
+      }
+      
+      setTimeout(addButton, 2000);
+    })();
+
   </body>
 </html>
