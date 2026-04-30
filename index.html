@@ -1488,5 +1488,75 @@ window.completeMaterialDatabase = {
   "Wheel, 8, 1 Piece, DWT, Alumalite, Aluminum, 7-8": { price: 2535, unit: "unit", category: "Wheel" }
 };
 
+    // Inject materials into app dropdowns
+    (function() {
+      function injectMaterials() {
+        // Wait for React app to render
+        setTimeout(() => {
+          const materialSelects = document.querySelectorAll('select');
+          materialSelects.forEach(select => {
+            // Check if this is a material dropdown
+            if(select.innerHTML.includes('Select Material') || select.placeholder?.includes('Material')) {
+              // Save current value
+              const currentValue = select.value;
+              
+              // Clear and add default option
+              select.innerHTML = '<option value="">Select Material</option>';
+              
+              // Add materials from database grouped by category
+              const categories = {};
+              Object.entries(window.completeMaterialDatabase || {}).forEach(([name, data]) => {
+                const cat = data.category || 'Other';
+                if(!categories[cat]) categories[cat] = [];
+                categories[cat].push({ name, ...data });
+              });
+              
+              // Sort categories
+              Object.keys(categories).sort().forEach(cat => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = cat + ' (' + categories[cat].length + ')';
+                
+                // Sort materials in category
+                categories[cat].sort((a, b) => a.name.localeCompare(b.name));
+                
+                categories[cat].forEach(mat => {
+                  const option = document.createElement('option');
+                  option.value = mat.name;
+                  let priceText = mat.price !== undefined ? '₹' + mat.price : 'Formula';
+                  option.textContent = mat.name + ' (' + priceText + ')';
+                  option.dataset.category = mat.category;
+                  option.dataset.unit = mat.unit;
+                  if(mat.formula) option.dataset.formula = 'true';
+                  optgroup.appendChild(option);
+                });
+                
+                select.appendChild(optgroup);
+              });
+              
+              // Restore value if exists
+              if(currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+                select.value = currentValue;
+              }
+              
+              console.log('Injected', Object.keys(window.completeMaterialDatabase || {}).length, 'materials into dropdown');
+            }
+          });
+        }, 2000);
+      }
+      
+      // Run on load
+      if(document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectMaterials);
+      } else {
+        injectMaterials();
+      }
+      
+      // Watch for new dropdowns
+      const observer = new MutationObserver(() => {
+        injectMaterials();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    })();
+
   </body>
 </html>
