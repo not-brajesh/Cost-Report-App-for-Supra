@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUPRA Cost Report - Simple Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #808080;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #ff6b35;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .section h2 {
+            color: #007bff;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #ced4da;
+            border-radius: 4px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn-add {
+            background: #28a745;
+            color: white;
+        }
+        .btn-add:hover {
+            background: #218838;
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        .cost-display {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .total-section {
+            background: #ff6b35;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .total-section h2 {
+            color: white;
+            margin: 0;
+        }
+        .grand-total {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏎️ SUPRA SAEINDIA Cost Report</h1>
+        
+        <!-- Materials Section -->
+        <div class="section">
+            <h2>📦 Materials (898 items from CSV)</h2>
+            <table id="materialsTable">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Material</th>
+                        <th>Use</th>
+                        <th>Unit Cost (₹)</th>
+                        <th>Unit</th>
+                        <th>Qty</th>
+                        <th>Sub Total (₹)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="materialsBody">
+                    <!-- Rows added dynamically -->
+                </tbody>
+            </table>
+            <button class="btn btn-add" onclick="addMaterialRow()">+ Add Material</button>
+        </div>
+
+        <!-- Total -->
+        <div class="total-section">
+            <h2>Grand Total</h2>
+            <div class="grand-total" id="grandTotal">₹0.00</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // HARDCODED MATERIALS DATA FROM CSV
+        // ============================================
+        const MATERIALS_DATA = {
+            "Bearings": [
+                {name: "Bearing Ball, Steel", price: 0.195, unit: "mm", formula: "[C1]*[Size1]+[C2]", c1: 0.195, c2: 3.25},
+                {name: "Bearing, Ball, Angular Contact", price: null, unit: "mm", formula: "[C1]*(([Size1]^2*[Size2]))^([C2])", c1: 6.5, c2: 32.5},
+                {name: "Bearing, Ball, Deep Groove", price: null, unit: "mm", formula: "[C1]*(([Size1]^2*[Size2]))^([C2])", c1: 6.5, c2: 32.5},
+                {name: "Bearing, Ball, Radial", price: null, unit: "mm", formula: "[C1]*(([Size1]^2*[Size2]))^([C2])", c1: 6.5, c2: 32.5},
+                {name: "Bearing, Cylindrical Roller", price: 234, unit: "mm"},
+                {name: "Bearing, Needle", price: 234, unit: "mm"},
+                {name: "Bearing, Spherical", price: 325, unit: "mm"},
+                {name: "Bearing, Tapered Roller", price: 679.25, unit: "mm"},
+                {name: "Rod End, Aluminum", price: 247, unit: "mm"},
+                {name: "Rod End, Industrial", price: 79.04, unit: "mm"},
+                {name: "Wheel Bearing, Ball, Radial", price: null, unit: "mm", formula: "Formula"},
+                {name: "Wheel Bearing, Tapered Roller", price: 1358.5, unit: "mm"}
+            ],
+            "Brake System": [
+                {name: "Brake Caliper, AP, CP2577", price: 8125, unit: "unit"},
+                {name: "Brake Caliper, Brembo, 20.6950.10", price: 4550, unit: "unit"},
+                {name: "Brake Caliper, Wilwood, Dynalite Single Floater", price: 3250, unit: "unit"},
+                {name: "Brake Caliper, Wilwood, GP310", price: 6825, unit: "unit"},
+                {name: "Brake Caliper, Student Built", price: 0, unit: "unit"},
+                {name: "Master Cylinder, AP, CP2623", price: 5297.5, unit: "unit"},
+                {name: "Master Cylinder, Brembo, 10.4776.10", price: 1690, unit: "unit"},
+                {name: "Master Cylinder, Wilwood, 260-1304", price: 1755, unit: "unit"},
+                {name: "Proportioning Valve, Hydraulic", price: 2275, unit: "unit"}
+            ],
+            "Raw Material": [
+                {name: "Aluminum, Normal", price: 273, unit: "kg"},
+                {name: "Aluminum, Premium", price: 273, unit: "kg"},
+                {name: "Steel, Mild", price: 146.25, unit: "kg"},
+                {name: "Steel, Stainless", price: 146.25, unit: "kg"},
+                {name: "Titanium", price: 1430, unit: "kg"}
+            ],
+            "Composite": [
+                {name: "Carbon Fiber, 1 Ply", price: 13000, unit: "kg"},
+                {name: "Honeycomb, Nomex", price: 8125, unit: "kg"}
+            ],
+            "Springs": [
+                {name: "Suspension Springs, Coil Spring, Steel", price: 1625, unit: "unit"},
+                {name: "Suspension Springs, Coil Spring, Titanium", price: 7150, unit: "unit"}
+            ],
+            "Tire": [
+                {name: "Tire, Hoosier, R25B, 13\"-20.0 x 7.5", price: 5525, unit: "unit"},
+                {name: "Tire, Avon, A45, 13\"-20.0 x 7.2", price: 6500, unit: "unit"}
+            ],
+            "Safety": [
+                {name: "Harness, Driver", price: 2925, unit: "unit"}
+            ],
+            "Sensors": [
+                {name: "Sensor, Accelerometer, 3 Axis", price: 520, unit: "unit"},
+                {name: "Sensor, Fluid Pressure", price: 260, unit: "unit"}
+            ],
+            "EV - Electronics": [
+                {name: "Battery, Tractive Lithium", price: 39000, unit: "kWh"}
+            ],
+            "EV - Tractive Drive": [
+                {name: "Motor, Tractive AC", price: 6500, unit: "kW"}
+            ],
+            "Misc": [
+                {name: "Paint", price: 650, unit: "m²"}
+            ],
+            "Fuel System": [
+                {name: "Foam, Fuel Anti-Surge", price: 65, unit: "liter"}
+            ]
+        };
+
+        let materialRowCount = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            addMaterialRow();
+        });
+
+        // Add Material Row
+        function addMaterialRow() {
+            materialRowCount++;
+            const tbody = document.getElementById('materialsBody');
+            const row = document.createElement('tr');
+            row.id = `material-${materialRowCount}`;
+            
+            row.innerHTML = `
+                <td>${materialRowCount}</td>
+                <td>
+                    <select onchange="updateMaterialCost(${materialRowCount})" id="mat-select-${materialRowCount}">
+                        <option value="">🔽 Select Material</option>
+                        ${generateMaterialOptions()}
+                    </select>
+                </td>
+                <td><input type="text" placeholder="Use description" style="width: 150px;"></td>
+                <td class="cost-display" id="mat-cost-${materialRowCount}">₹0.00</td>
+                <td id="mat-unit-${materialRowCount}">-</td>
+                <td><input type="number" value="1" min="0" onchange="updateMaterialCost(${materialRowCount})"></td>
+                <td class="cost-display" id="mat-total-${materialRowCount}">₹0.00</td>
+                <td><button class="btn btn-delete" onclick="deleteMaterialRow(${materialRowCount})">Delete</button></td>
+            `;
+            
+            tbody.appendChild(row);
+        }
+
+        // Generate Material Options
+        function generateMaterialOptions() {
+            let html = '';
+            const categories = Object.keys(MATERIALS_DATA).sort();
+            
+            categories.forEach(cat => {
+                html += `<optgroup label="📁 ${cat} (${MATERIALS_DATA[cat].length})">`;
+                MATERIALS_DATA[cat].forEach(mat => {
+                    const priceText = mat.price ? `₹${mat.price}` : '[Formula]';
+                    html += `<option value="${cat}|${mat.name}">  ${mat.name} - ${priceText}</option>`;
+                });
+                html += '</optgroup>';
+            });
+            
+            return html;
+        }
+
+        // Update Material Cost
+        function updateMaterialCost(rowId) {
+            const select = document.getElementById(`mat-select-${rowId}`);
+            const qtyInput = select.parentElement.parentElement.querySelector('input[type="number"]');
+            const qty = parseFloat(qtyInput.value) || 0;
+            
+            if (!select.value) {
+                document.getElementById(`mat-cost-${rowId}`).textContent = '₹0.00';
+                document.getElementById(`mat-unit-${rowId}`).textContent = '-';
+                document.getElementById(`mat-total-${rowId}`).textContent = '₹0.00';
+                updateGrandTotal();
+                return;
+            }
+            
+            const [category, name] = select.value.split('|');
+            const material = MATERIALS_DATA[category].find(m => m.name === name);
+            
+            if (material) {
+                const unitCost = material.price || 0;
+                const total = unitCost * qty;
+                
+                document.getElementById(`mat-cost-${rowId}`).textContent = `₹${unitCost.toFixed(2)}`;
+                document.getElementById(`mat-unit-${rowId}`).textContent = material.unit;
+                document.getElementById(`mat-total-${rowId}`).textContent = `₹${total.toFixed(2)}`;
+            }
+            
+            updateGrandTotal();
+        }
+
+        // Delete Material Row
+        function deleteMaterialRow(rowId) {
+            const row = document.getElementById(`material-${rowId}`);
+            if (row) {
+                row.remove();
+                updateGrandTotal();
+            }
+        }
+
+        // Update Grand Total
+        function updateGrandTotal() {
+            let total = 0;
+            document.querySelectorAll('[id^="mat-total-"]').forEach(el => {
+                const value = el.textContent.replace('₹', '').replace(',', '');
+                total += parseFloat(value) || 0;
+            });
+            
+            document.getElementById('grandTotal').textContent = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        }
+    </script>
+</body>
+</html>
