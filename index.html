@@ -1627,12 +1627,19 @@ window.completeMaterialDatabase = {
         const btn = document.createElement('button');
         btn.id = 'loadMaterialsBtn';
         btn.textContent = '📦 Load 898 Materials from CSV';
-        btn.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:9999;background:#28a745;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
+        btn.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:9999;background:#6c757d;color:white;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.3)';
         
         btn.onclick = function() {
+          btn.textContent = '⏳ Loading...';
+          btn.style.background = '#ffc107';
+          btn.style.color = '#000';
+          
           const db = window.completeMaterialDatabase;
           if(!db) {
-            alert('Database not found! Please refresh.');
+            alert('❌ Database not found! Please refresh page.');
+            btn.textContent = '❌ Error - Click to Retry';
+            btn.style.background = '#dc3545';
+            btn.style.color = '#fff';
             return;
           }
           
@@ -1667,11 +1674,15 @@ window.completeMaterialDatabase = {
             }
           });
           
-          btn.textContent = '✅ Loaded 898 Materials into ' + count + ' dropdowns!';
-          btn.style.background = '#17a2b8';
-          setTimeout(() => {
-            btn.style.opacity = '0.7';
-          }, 3000);
+          if(count > 0) {
+            btn.textContent = '✅ Loaded 898 Materials into ' + count + ' dropdown!';
+            btn.style.background = '#28a745';
+            btn.style.color = '#fff';
+          } else {
+            btn.textContent = '⚠️ No dropdowns found - Click to Retry';
+            btn.style.background = '#fd7e14';
+            btn.style.color = '#fff';
+          }
         };
         
         document.body.appendChild(btn);
