@@ -170,5 +170,100 @@
       };
     })();
     </script>
+
+    <!-- Comma Formatting for Cost Fields -->
+    <script>
+    (function() {
+      // Format number with commas
+      function formatWithCommas(value) {
+        if (!value) return value;
+        // Remove existing commas first
+        const numStr = value.toString().replace(/,/g, '');
+        // Check if it's a number
+        const num = parseFloat(numStr);
+        if (isNaN(num)) return value;
+        // Format with commas
+        return num.toLocaleString('en-IN');
+      }
+
+      // Format input value
+      function formatInput(input) {
+        const cursorPosition = input.selectionStart;
+        const originalLength = input.value.length;
+        
+        const formatted = formatWithCommas(input.value);
+        input.value = formatted;
+        
+        // Restore cursor position
+        const newLength = input.value.length;
+        const diff = newLength - originalLength;
+        input.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+      }
+
+      // Setup comma formatting for cost fields
+      function setupCommaFormatting() {
+        // Target cost-related inputs
+        const costKeywords = ['cost', 'price', 'unit', 'list', 'process', 'amount', 'total'];
+        
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], input');
+        inputs.forEach(input => {
+          const id = (input.id || '').toLowerCase();
+          const name = (input.name || '').toLowerCase();
+          const placeholder = (input.placeholder || '').toLowerCase();
+          const label = input.labels && input.labels[0] ? input.labels[0].textContent.toLowerCase() : '';
+          
+          // Check if this is a cost-related field
+          const isCostField = costKeywords.some(keyword => 
+            id.includes(keyword) || 
+            name.includes(keyword) || 
+            placeholder.includes(keyword) ||
+            label.includes(keyword)
+          );
+          
+          if (isCostField) {
+            // Format on input
+            input.addEventListener('input', function() {
+              formatInput(input);
+            });
+            
+            // Format on blur
+            input.addEventListener('blur', function() {
+              input.value = formatWithCommas(input.value);
+            });
+            
+            // Initial format
+            if (input.value) {
+              input.value = formatWithCommas(input.value);
+            }
+          }
+        });
+      }
+
+      // Setup on DOM ready and watch for new elements
+      function initCommaFormatting() {
+        setupCommaFormatting();
+        
+        // Watch for new inputs being added
+        const observer = new MutationObserver(() => {
+          setupCommaFormatting();
+        });
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      }
+
+      // Start when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCommaFormatting);
+      } else {
+        setTimeout(initCommaFormatting, 1000);
+      }
+
+      // Global format function
+      window.formatNumberWithCommas = formatWithCommas;
+    })();
+    </script>
   </body>
 </html>
