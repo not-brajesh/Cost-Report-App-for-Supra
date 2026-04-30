@@ -425,6 +425,192 @@
     // Store in localStorage for app to access
     localStorage.setItem('processCosts_2025', JSON.stringify(window.updatedProcessCosts));
     console.log('Updated process costs from CostTable_Processes_2025.csv loaded successfully');
+
+    // Updated material costs from CostTable_Materials_2025_converted.csv (Posted Version 1.0, 19-May-2025)
+    window.updatedMaterialCosts = {
+      // Bearings
+      "Bearing Ball, Steel": { tablePrice: "[C1]*[Size1]+[C2]", unit: "mm", c1: 0.195, c2: 3.25, category: "Bearings" },
+      "Bearing, Ball, Deep Groove": { tablePrice: "[C1]*(([Size1]^2*[Size2]))^([C2])", unit: "mm", c1: 6.5, c2: 32.5, category: "Bearings" },
+      "Bearing, Cylindrical Roller": { tablePrice: "[C1]*[Size1]*[Size2]+[C2]", unit: "mm", c1: 0.2925, c2: 234, category: "Bearings" },
+      "Bearing, Needle": { tablePrice: "[C1]*[Size1]*[Size2]+[C2]", unit: "mm", c1: 0.2925, c2: 234, category: "Bearings" },
+      "Bearing, Spherical": { tablePrice: "[C1]*[Size1]^2+[C2]", unit: "mm", c1: 1.95, c2: 325, category: "Bearings" },
+      "Bearing, Tapered Roller": { tablePrice: "[C1]*[Size1]*[Size2]+[C2]", unit: "mm", c1: 0.2925, c2: 679.25, category: "Bearings" },
+      "Wheel Bearing, Ball, Radial": { tablePrice: "[C1]*(([Size1]^2*[Size2]))^([C2])", unit: "mm", c1: 26, c2: 32.5, category: "Bearings" },
+      "Rod End, Aluminum": { tablePrice: "[C1]*[Size1]^2+[C2]", unit: "mm", c1: 3.25, c2: 247, category: "Bearings" },
+      "Rod End, Industrial": { tablePrice: "[C1]*[Size1]^2+[C2]", unit: "mm", c1: 1.3, c2: 79.04, category: "Bearings" },
+      "Rod End, Precison (Aircraft)": { tablePrice: "[C1]*[Size1]^2+[C2]", unit: "mm", c1: 3.25, c2: 325, category: "Bearings" },
+      "Bushing, Student Built": { tablePrice: 0, unit: "unit", category: "Bearings" },
+
+      // Raw Materials - Metals
+      "Aluminum, Normal": { tablePrice: 273, unit: "kg", category: "Raw Material" },
+      "Aluminum, Premium": { tablePrice: 273, unit: "kg", category: "Raw Material" },
+      "Aluminum Metal Matrix Composite": { tablePrice: 2145, unit: "kg", category: "Raw Material" },
+      "Brass": { tablePrice: 143, unit: "kg", category: "Raw Material" },
+      "Bronze": { tablePrice: 143, unit: "kg", category: "Raw Material" },
+      "Copper": { tablePrice: 143, unit: "kg", category: "Raw Material" },
+      "Iron": { tablePrice: 65, unit: "kg", category: "Raw Material" },
+      "Inconel": { tablePrice: 1430, unit: "kg", category: "Raw Material" },
+      "Magnesium": { tablePrice: 390, unit: "kg", category: "Raw Material" },
+      "Nickel": { tablePrice: 143, unit: "kg", category: "Raw Material" },
+      "Steel, Mild": { tablePrice: 146.25, unit: "kg", category: "Raw Material" },
+      "Steel, Alloy": { tablePrice: 146.25, unit: "kg", category: "Raw Material" },
+      "Steel, Stainless": { tablePrice: 146.25, unit: "kg", category: "Raw Material" },
+      "Titanium": { tablePrice: 1430, unit: "kg", category: "Raw Material" },
+      "Tubing, Steel": { tablePrice: 146.25, unit: "kg", category: "Raw Material" },
+
+      // Raw Materials - Plastics
+      "Plastic, ABS": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, Acetal": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, Acrylic": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, Nylon": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, PEEK": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, Polycarbonate": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, Polyethelene": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, Polypropolene": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Plastic, PVC": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+      "Rubber": { tablePrice: 214.5, unit: "kg", category: "Raw Material" },
+
+      // Composites
+      "Carbon Fiber, 1 Ply": { tablePrice: 13000, unit: "kg", category: "Composite" },
+      "Aramid (Kevlar) Fiber, 1 Ply": { tablePrice: 9750, unit: "kg", category: "Composite" },
+      "Glass Fiber, 1 Ply": { tablePrice: 6500, unit: "kg", category: "Composite" },
+      "Basalt Fiber, 1 Ply": { tablePrice: 7150, unit: "kg", category: "Composite" },
+      "Flax Fiber, 1 Ply": { tablePrice: 7150, unit: "kg", category: "Composite" },
+      "Ceramic Matrix Composite, 1 Ply": { tablePrice: 32500, unit: "kg", category: "Composite" },
+      "Honeycomb, Aluminum": { tablePrice: 3250, unit: "kg", category: "Composite" },
+      "Honeycomb, Nomex": { tablePrice: 8125, unit: "kg", category: "Composite" },
+      "Honeycomb, Cardboard": { tablePrice: 650, unit: "kg", category: "Composite" },
+      "Honeycomb, Plastic": { tablePrice: 1300, unit: "kg", category: "Composite" },
+      "Structural Foam": { tablePrice: 8125, unit: "kg", category: "Composite" },
+      "Carbon Fiber Reinf Carbon": { tablePrice: 0.6, unit: "mm^3", category: "Composite" },
+
+      // Brake System Components
+      "Brake Caliper, AP, CP2577": { tablePrice: 8125, unit: "unit", category: "Brake System" },
+      "Brake Caliper, AP, CP3696-6E0": { tablePrice: 5037.5, unit: "unit", category: "Brake System" },
+      "Brake Caliper, Brembo, 20.6950.10": { tablePrice: 4550, unit: "unit", category: "Brake System" },
+      "Brake Caliper, Brembo, 20.6951.12/P34G": { tablePrice: 4550, unit: "unit", category: "Brake System" },
+      "Brake Caliper, Wilwood, Dynalite Single Floater": { tablePrice: 3250, unit: "unit", category: "Brake System" },
+      "Brake Caliper, Wilwood, GP310": { tablePrice: 6825, unit: "unit", category: "Brake System" },
+      "Brake Caliper, Wilwood, GP320": { tablePrice: 6370, unit: "unit", category: "Brake System" },
+      "Brake Caliper, Student Built": { tablePrice: 0, unit: "unit", category: "Brake System" },
+      "Master Cylinder, AP, CP2623": { tablePrice: 5297.5, unit: "unit", category: "Brake System" },
+      "Master Cylinder, AP, CP3756": { tablePrice: 6305, unit: "unit", category: "Brake System" },
+      "Master Cylinder, AP, CP4400": { tablePrice: 7637.5, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Brembo, 10.4776.10": { tablePrice: 1690, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Brembo, 10.4776.65": { tablePrice: 3022.5, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Magura, 10.5mm": { tablePrice: 3575, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Magura, 770.1": { tablePrice: 14462.5, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Wilwood, 260-10371": { tablePrice: 2795, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Wilwood, 260-1304": { tablePrice: 1755, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Tilton, Model 74": { tablePrice: 2567.5, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Tilton, Model 75": { tablePrice: 3217.5, unit: "unit", category: "Brake System" },
+      "Master Cylinder, Tilton, Model 76": { tablePrice: 4062.5, unit: "unit", category: "Brake System" },
+      "Brake Rotor (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Brake System" },
+      "Brake Pad, Iron or Steel Rotor": { tablePrice: 0.01, unit: "mm^3", category: "Brake System" },
+      "Brake Pad, Aluminum or MMC Rotor": { tablePrice: 0.03, unit: "mm^3", category: "Brake System" },
+      "Proportioning Valve, Hydraulic": { tablePrice: 2275, unit: "unit", category: "Brake System" },
+      "Proportioning Valve, Tilton, 90-1000": { tablePrice: 3217.5, unit: "unit", category: "Brake System" },
+
+      // Suspension Components
+      "Suspension Springs, Coil Spring, Steel": { tablePrice: 1625, unit: "unit", category: "Springs" },
+      "Suspension Springs, Coil Spring, Titanium": { tablePrice: 7150, unit: "unit", category: "Springs" },
+      "Spring, Compression (General)": { tablePrice: 65, unit: "unit", category: "Springs" },
+      "Spring, Tension (General)": { tablePrice: 65, unit: "unit", category: "Springs" },
+      "Spring, Torsion (General)": { tablePrice: 65, unit: "unit", category: "Springs" },
+
+      // Chassis (Cost as Made)
+      "Chassis (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Chassis" },
+      "Upright (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Chassis" },
+      "Hubs (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Chassis" },
+      "A-Arms (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Suspension" },
+      "Wishbones (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Suspension" },
+      "Rockers (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Chassis" },
+      "Monocoque (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Chassis" },
+      "Steering Rack (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Steering" },
+      "Steering Wheel (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Steering" },
+
+      // Tires
+      "Tire, American Racer, SD44, 8\"-15.0 x6.0": { tablePrice: 4420, unit: "unit", category: "Tire" },
+      "Tire, American Racer, SD44, 8\"-15.0 x7.0": { tablePrice: 4420, unit: "unit", category: "Tire" },
+      "Tire, Avon, A45, 13\"-20.0 x 7.2": { tablePrice: 6500, unit: "unit", category: "Tire" },
+      "Tire, Bridgestone, 13\"-180mm/510mm": { tablePrice: 5200, unit: "unit", category: "Tire" },
+      "Tire, Continental, 13\"": { tablePrice: 5200, unit: "unit", category: "Tire" },
+      "Tire, Hoosier, R25B, 13\"-20.0 x 7.5": { tablePrice: 5525, unit: "unit", category: "Tire" },
+      "Tire, Hoosier, R25B, 13\"-20.0 x 8.0": { tablePrice: 5525, unit: "unit", category: "Tire" },
+      "Tire, Hoosier, R25B, 13\"-20.0 x 9.0": { tablePrice: 5525, unit: "unit", category: "Tire" },
+      "Tire, Hoosier, Wet, 13\"-20.0 x 7.5": { tablePrice: 6500, unit: "unit", category: "Tire" },
+      "Tire, Michelin, P220, 13\"-20.9 x 6.3": { tablePrice: 6500, unit: "unit", category: "Tire" },
+      "Tire, Yokohoma, ADVAN Dry, 13\" 160-55": { tablePrice: 8775, unit: "unit", category: "Tire" },
+      "Valve Stem (and Tire Inflation)": { tablePrice: 65, unit: "unit", category: "Tire" },
+
+      // Safety
+      "Harness, Driver": { tablePrice: 2925, unit: "unit", category: "Safety" },
+
+      // Sensors
+      "Sensor, Accelerometer, 3 Axis": { tablePrice: 520, unit: "unit", category: "Sensors" },
+      "Sensor, Fluid Pressure": { tablePrice: 260, unit: "unit", category: "Sensors" },
+      "Sensor, Hall Effect": { tablePrice: 260, unit: "unit", category: "Sensors" },
+      "Sensor, Temperature": { tablePrice: 520, unit: "unit", category: "Sensors" },
+      "Sensor, Wide Band Air Fuel Raito": { tablePrice: 2275, unit: "unit", category: "Sensors" },
+
+      // Hardware
+      "Grommet, Elastomer": { tablePrice: 3.25, unit: "unit", category: "Hardware" },
+      "Cable Tie Mount, Adhesive Backed": { tablePrice: 9.75, unit: "unit", category: "Hardware" },
+      "Woodruff Key": { tablePrice: 6.5, unit: "unit", category: "Hardware" },
+
+      // Plumbing
+      "Hose, High Pressure, Stainless Steel Braided Outer": { tablePrice: "[C1]*[Size1]+[C2]", unit: "mm", c1: 160.55, c2: -176.15, category: "Plumbing" },
+      "Hose, Low Pressure, Fabric Outer": { tablePrice: "[C1]*[Size1]+[C2]", unit: "mm", c1: 210.6, c2: 631.8, category: "Plumbing" },
+      "Hose, Rubber": { tablePrice: "[C1]*[Size1]+[C2]", unit: "mm", c1: 11.7, c2: 0, category: "Plumbing" },
+      "Hose, Silicone": { tablePrice: "[C1]*[Size1]+[C2]", unit: "mm", c1: 30.55, c2: 0, category: "Plumbing" },
+      "Hose, Polyurethane": { tablePrice: "[C1]*[Size1]+[C2]", unit: "mm", c1: 4.55, c2: 0, category: "Plumbing" },
+
+      // Pedals
+      "Pedal Assembly, Optimum Balance Products OBP0181": { tablePrice: 7150, unit: "unit", category: "Pedals" },
+      "Pedal, Wilwood, 340-1285": { tablePrice: 3965, unit: "unit", category: "Pedals" },
+
+      // Fuel System
+      "Foam, Fuel Anti-Surge": { tablePrice: 65, unit: "liter", category: "Fuel System" },
+      "Fuel Check Valve, In-line, Aluminum Rollover": { tablePrice: 975, unit: "unit", category: "Fuel System" },
+
+      // EV Components
+      "Battery, Tractive Lithium": { tablePrice: 39000, unit: "kWh", category: "EV - Electronics" },
+      "Motor, Tractive AC": { tablePrice: 6500, unit: "kW", category: "EV - Tractive Drive" },
+      "Motor, Tractive DC": { tablePrice: 3250, unit: "kW", category: "EV - Tractive Drive" },
+
+      // Fluids
+      "Fluid, Oil": { tablePrice: 48.75, unit: "liter", category: "Fluid" },
+      "Fluid, Coolant": { tablePrice: 0.01, unit: "liter", category: "Fluid" },
+
+      // Misc
+      "Paint": { tablePrice: 650, unit: "m^2", category: "Misc" },
+      "Heat Barrier": { tablePrice: 3250, unit: "m^2", category: "Misc" },
+      "Seat (All Cost as Made)": { tablePrice: 0, unit: "unit", category: "Misc" },
+      "Filler Cap": { tablePrice: 195, unit: "unit", category: "Misc" },
+      "Tape": { tablePrice: 0, unit: "unit", category: "Misc" },
+
+      // Sheet Materials
+      "Fabric": { tablePrice: 162.5, unit: "m^2", category: "Sheet Material" },
+      "Glass": { tablePrice: 650, unit: "m^2", category: "Sheet Material" },
+      "Leather": { tablePrice: 6500, unit: "m^2", category: "Sheet Material" },
+      "Suede": { tablePrice: 6500, unit: "m^2", category: "Sheet Material" },
+
+      // Seals
+      "Seal, O-Ring, Elastomer": { tablePrice: 3.25, unit: "unit", category: "Seals" },
+      "Seal, Radial Lip Seal": { tablePrice: 65, unit: "unit", category: "Seals" },
+
+      // Wood
+      "Wood, Hard": { tablePrice: 0.26, unit: "cm^3", category: "Raw Material" },
+      "Wood, Soft": { tablePrice: 0.2, unit: "cm^3", category: "Raw Material" },
+      "Wood, Medium Density Fiberboard": { tablePrice: 0.13, unit: "cm^3", category: "Raw Material" },
+
+      // Cork
+      "Cork": { tablePrice: 0.33, unit: "cm^3", category: "Raw Material" }
+    };
+
+    // Store in localStorage for app to access
+    localStorage.setItem('materialCosts_2025', JSON.stringify(window.updatedMaterialCosts));
+    console.log('Updated material costs from CostTable_Materials_2025_converted.csv loaded successfully');
     </script>
   </body>
 </html>
