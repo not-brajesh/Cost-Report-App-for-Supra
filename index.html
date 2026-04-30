@@ -1488,74 +1488,110 @@ window.completeMaterialDatabase = {
   "Wheel, 8, 1 Piece, DWT, Alumalite, Aluminum, 7-8": { price: 2535, unit: "unit", category: "Wheel" }
 };
 
-    // Inject materials into app dropdowns
+    // Inject 898 materials into app dropdowns
     (function() {
+      let injected = false;
+      
       function injectMaterials() {
-        // Wait for React app to render
-        setTimeout(() => {
-          const materialSelects = document.querySelectorAll('select');
-          materialSelects.forEach(select => {
-            // Check if this is a material dropdown
-            if(select.innerHTML.includes('Select Material') || select.placeholder?.includes('Material')) {
-              // Save current value
-              const currentValue = select.value;
+        if(injected) return; // Prevent multiple injections
+        
+        const db = window.completeMaterialDatabase;
+        if(!db || Object.keys(db).length === 0) {
+          console.log('Database not ready yet, retrying...');
+          return;
+        }
+        
+        // Find all select elements
+        const selects = document.querySelectorAll('select');
+        let found = 0;
+        
+        selects.forEach(select => {
+          // Check if this looks like a material or part dropdown
+          const firstOption = select.querySelector('option');
+          const hasOldData = select.querySelector('option[value="Main Frame Rail"], option[value="Steel Tube 25.4mm x 2.4mm"]');
+          
+          if(hasOldData || (firstOption && (firstOption.textContent.includes('Select Part') || firstOption.textContent.includes('Select Material')))) {
+            found++;
+            
+            // Save current selection
+            const currentValue = select.value;
+            
+            // Clear existing options
+            select.innerHTML = '';
+            
+            // Add default option
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = firstOption && firstOption.textContent.includes('Part') ? 'Select Part' : 'Select Material';
+            select.appendChild(defaultOpt);
+            
+            // Group by category
+            const categories = {};
+            Object.entries(db).forEach(([name, data]) => {
+              const cat = data.category || 'Other';
+              if(!categories[cat]) categories[cat] = [];
+              categories[cat].push({ name, ...data });
+            });
+            
+            // Add categories and materials
+            Object.keys(categories).sort().forEach(cat => {
+              const optgroup = document.createElement('optgroup');
+              optgroup.label = cat + ' (' + categories[cat].length + ' items)';
               
-              // Clear and add default option
-              select.innerHTML = '<option value="">Select Material</option>';
+              categories[cat].sort((a, b) => a.name.localeCompare(b.name));
               
-              // Add materials from database grouped by category
-              const categories = {};
-              Object.entries(window.completeMaterialDatabase || {}).forEach(([name, data]) => {
-                const cat = data.category || 'Other';
-                if(!categories[cat]) categories[cat] = [];
-                categories[cat].push({ name, ...data });
+              categories[cat].forEach(mat => {
+                const option = document.createElement('option');
+                option.value = mat.name;
+                let displayPrice = typeof mat.price === 'number' ? '₹' + mat.price.toLocaleString() : (mat.formula ? '[Formula]' : 'N/A');
+                option.textContent = mat.name + ' - ' + displayPrice;
+                optgroup.appendChild(option);
               });
               
-              // Sort categories
-              Object.keys(categories).sort().forEach(cat => {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = cat + ' (' + categories[cat].length + ')';
-                
-                // Sort materials in category
-                categories[cat].sort((a, b) => a.name.localeCompare(b.name));
-                
-                categories[cat].forEach(mat => {
-                  const option = document.createElement('option');
-                  option.value = mat.name;
-                  let priceText = mat.price !== undefined ? '₹' + mat.price : 'Formula';
-                  option.textContent = mat.name + ' (' + priceText + ')';
-                  option.dataset.category = mat.category;
-                  option.dataset.unit = mat.unit;
-                  if(mat.formula) option.dataset.formula = 'true';
-                  optgroup.appendChild(option);
-                });
-                
-                select.appendChild(optgroup);
-              });
-              
-              // Restore value if exists
-              if(currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
-                select.value = currentValue;
-              }
-              
-              console.log('Injected', Object.keys(window.completeMaterialDatabase || {}).length, 'materials into dropdown');
+              select.appendChild(optgroup);
+            });
+            
+            // Restore selection if valid
+            if(currentValue && select.querySelector(`option[value="${CSS.escape(currentValue)}"]`)) {
+              select.value = currentValue;
             }
-          });
-        }, 2000);
+          }
+        });
+        
+        if(found > 0) {
+          injected = true;
+          console.log('✅ Successfully injected', Object.keys(db).length, 'materials into', found, 'dropdown(s)');
+        } else {
+          console.log('⏳ Waiting for dropdowns to appear...');
+        }
       }
       
-      // Run on load
+      // Try multiple times
+      let attempts = 0;
+      const maxAttempts = 20;
+      
+      function tryInject() {
+        if(attempts >= maxAttempts || injected) return;
+        attempts++;
+        
+        injectMaterials();
+        
+        if(!injected) {
+          setTimeout(tryInject, 500); // Retry every 500ms
+        }
+      }
+      
+      // Start trying
       if(document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectMaterials);
+        document.addEventListener('DOMContentLoaded', tryInject);
       } else {
-        injectMaterials();
+        tryInject();
       }
       
-      // Watch for new dropdowns
-      const observer = new MutationObserver(() => {
-        injectMaterials();
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
+      // Also try when user interacts
+      document.addEventListener('click', function() {
+        if(!injected) tryInject();
+      }, { once: true });
     })();
 
   </body>
