@@ -1488,44 +1488,58 @@ window.completeMaterialDatabase = {
   "Wheel, 8, 1 Piece, DWT, Alumalite, Aluminum, 7-8": { price: 2535, unit: "unit", category: "Wheel" }
 };
 
-    // Inject 898 materials into app dropdowns
+    // Inject 898 materials into app dropdowns - FORCE MODE
     (function() {
-      let injected = false;
+      let injectedMaterials = false;
+      let injectedParts = false;
       
-      function injectMaterials() {
-        if(injected) return; // Prevent multiple injections
-        
+      function injectAllDropdowns() {
         const db = window.completeMaterialDatabase;
         if(!db || Object.keys(db).length === 0) {
-          console.log('Database not ready yet, retrying...');
-          return;
+          console.log('⏳ Database not ready...');
+          return false;
         }
         
-        // Find all select elements
-        const selects = document.querySelectorAll('select');
-        let found = 0;
+        // Get all select elements
+        const allSelects = document.querySelectorAll('select');
+        let materialCount = 0;
+        let partCount = 0;
         
-        selects.forEach(select => {
-          // Check if this looks like a material or part dropdown
-          const firstOption = select.querySelector('option');
-          const hasOldData = select.querySelector('option[value="Main Frame Rail"], option[value="Steel Tube 25.4mm x 2.4mm"]');
+        allSelects.forEach(select => {
+          const options = Array.from(select.querySelectorAll('option'));
+          const optionText = options.map(o => o.textContent).join(' ');
           
-          if(hasOldData || (firstOption && (firstOption.textContent.includes('Select Part') || firstOption.textContent.includes('Select Material')))) {
-            found++;
+          // DETECT MATERIAL DROPDOWN - Check for old material names OR "Select Material"
+          const isMaterialDropdown = optionText.includes('Steel Tube') || 
+                                     optionText.includes('Steel Sheet') || 
+                                     optionText.includes('Aluminium Sheet') ||
+                                     optionText.includes('Carbon Fiber') ||
+                                     optionText.includes('Mild Steel') ||
+                                     (select.innerHTML.includes('Select Material') && !injectedMaterials);
+          
+          // DETECT PART DROPDOWN - Check for old part names OR "Select Part"  
+          const isPartDropdown = optionText.includes('Main Frame Rail') ||
+                                 optionText.includes('Roll Hoop') ||
+                                 optionText.includes('Body Panel') ||
+                                 optionText.includes('Impact Attenuator') ||
+                                 (select.innerHTML.includes('Select Part') && !injectedParts);
+          
+          if(isMaterialDropdown || isPartDropdown) {
+            console.log('Found dropdown:', isMaterialDropdown ? 'MATERIALS' : 'PARTS');
             
-            // Save current selection
+            // Save current value
             const currentValue = select.value;
             
-            // Clear existing options
+            // Clear all options
             select.innerHTML = '';
             
             // Add default option
             const defaultOpt = document.createElement('option');
             defaultOpt.value = '';
-            defaultOpt.textContent = firstOption && firstOption.textContent.includes('Part') ? 'Select Part' : 'Select Material';
+            defaultOpt.textContent = isMaterialDropdown ? 'Select Material' : 'Select Part';
             select.appendChild(defaultOpt);
             
-            // Group by category
+            // Build category groups
             const categories = {};
             Object.entries(db).forEach(([name, data]) => {
               const cat = data.category || 'Other';
@@ -1533,65 +1547,76 @@ window.completeMaterialDatabase = {
               categories[cat].push({ name, ...data });
             });
             
-            // Add categories and materials
-            Object.keys(categories).sort().forEach(cat => {
+            // Add sorted categories with optgroups
+            const sortedCats = Object.keys(categories).sort();
+            sortedCats.forEach(cat => {
               const optgroup = document.createElement('optgroup');
-              optgroup.label = cat + ' (' + categories[cat].length + ' items)';
+              optgroup.label = cat + ' (' + categories[cat].length + ')';
               
+              // Sort materials in category
               categories[cat].sort((a, b) => a.name.localeCompare(b.name));
               
               categories[cat].forEach(mat => {
                 const option = document.createElement('option');
                 option.value = mat.name;
-                let displayPrice = typeof mat.price === 'number' ? '₹' + mat.price.toLocaleString() : (mat.formula ? '[Formula]' : 'N/A');
-                option.textContent = mat.name + ' - ' + displayPrice;
+                let priceDisplay = typeof mat.price === 'number' 
+                  ? '₹' + mat.price.toLocaleString('en-IN') 
+                  : (mat.formula ? '[Formula]' : 'N/A');
+                option.textContent = mat.name + ' - ' + priceDisplay;
                 optgroup.appendChild(option);
               });
               
               select.appendChild(optgroup);
             });
             
-            // Restore selection if valid
-            if(currentValue && select.querySelector(`option[value="${CSS.escape(currentValue)}"]`)) {
-              select.value = currentValue;
+            // Restore selection
+            if(currentValue) {
+              const restored = select.querySelector(`option[value="${CSS.escape(currentValue)}"]`);
+              if(restored) select.value = currentValue;
             }
+            
+            if(isMaterialDropdown) materialCount++;
+            if(isPartDropdown) partCount++;
           }
         });
         
-        if(found > 0) {
-          injected = true;
-          console.log('✅ Successfully injected', Object.keys(db).length, 'materials into', found, 'dropdown(s)');
-        } else {
-          console.log('⏳ Waiting for dropdowns to appear...');
+        if(materialCount > 0) injectedMaterials = true;
+        if(partCount > 0) injectedParts = true;
+        
+        const totalFound = materialCount + partCount;
+        if(totalFound > 0) {
+          console.log('✅ Injected', Object.keys(db).length, 'items into', totalFound, 'dropdown(s)');
         }
+        
+        return totalFound > 0;
       }
       
-      // Try multiple times
+      // Try to inject with multiple attempts
       let attempts = 0;
-      const maxAttempts = 20;
-      
-      function tryInject() {
-        if(attempts >= maxAttempts || injected) return;
+      function forceInject() {
+        if(attempts >= 30) return; // Max 30 attempts (15 seconds)
         attempts++;
         
-        injectMaterials();
+        const success = injectAllDropdowns();
         
-        if(!injected) {
-          setTimeout(tryInject, 500); // Retry every 500ms
+        if(!success && attempts < 30) {
+          setTimeout(forceInject, 500);
         }
       }
       
-      // Start trying
+      // Start immediately
       if(document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryInject);
+        document.addEventListener('DOMContentLoaded', forceInject);
       } else {
-        tryInject();
+        forceInject();
       }
       
-      // Also try when user interacts
-      document.addEventListener('click', function() {
-        if(!injected) tryInject();
-      }, { once: true });
+      // Also trigger on any click (when user opens dropdown)
+      document.addEventListener('click', function(e) {
+        if(e.target.tagName === 'SELECT' || e.target.closest('select')) {
+          injectAllDropdowns();
+        }
+      });
     })();
 
   </body>
